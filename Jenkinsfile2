@@ -15,7 +15,7 @@ pipeline{
         }
         stage('Checkout from Git'){
             steps{
-                git branch: 'main', url: 'https://github.com/accname/student-registration-form.git'
+                git branch: 'main', url: 'https://github.com/accname/accname-registration-form.git'
             }
         }
         stage("sonarqube Analysis "){
@@ -47,16 +47,16 @@ pipeline{
             steps{
                 script{
                    withDockerRegistry(credentialsId: 'docker', toolName: 'docker'){   
-                       sh "docker build -t student ."
-                       sh "docker tag student accname/student:latest "
-                       sh "docker push accname/student:latest "
+                       sh "docker build -t accname ."
+                       sh "docker tag accname accname/accname:latest "
+                       sh "docker push accname/accname:latest "
                     }
                 }
             }
         }
         stage("TRIVY"){
             steps{
-                sh "trivy image student/netflix:latest > trivyimage.txt" 
+                sh "trivy image accname/netflix:latest > trivyimage.txt" 
             }
         }
         stage('clear containers') {

@@ -15,7 +15,7 @@ pipeline{
         }
         stage('Checkout from Git'){
             steps{
-                git branch: 'main', url: 'https://github.com/tirucloud/student-registration-form.git'
+                git branch: 'main', url: 'https://github.com/accname/student-registration-form.git'
             }
         }
         stage("sonarqube Analysis "){
@@ -48,8 +48,8 @@ pipeline{
                 script{
                    withDockerRegistry(credentialsId: 'docker', toolName: 'docker'){   
                        sh "docker build -t student ."
-                       sh "docker tag student tirucloud/student:latest "
-                       sh "docker push tirucloud/student:latest "
+                       sh "docker tag student accname/student:latest "
+                       sh "docker push accname/student:latest "
                     }
                 }
             }

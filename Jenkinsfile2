@@ -71,6 +71,20 @@ pipeline{
         }
 
     }
+        stage('Deploy to EKS') {
+            steps {
+                withCredentials([[
+                $class: 'AmazonWebServicesCredentialsBinding',
+                credentialsId: 'aws-cred'
+                ]]) {
+                sh '''
+                aws eks update-kubeconfig --region us-east-1 --name tiru-cluster
+                kubectl apply -f Kubernetes/ds.yml --validate=false
+                '''
+                }
+            }
+         }
+    }
     post {
      always {
         emailext attachLog: true,

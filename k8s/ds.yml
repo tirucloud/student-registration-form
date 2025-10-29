@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: simple-student-registration-form
+  labels:
+    app: simple-student-registration-form
+spec:
+  replicas: 1  # Adjust for scaling
+  selector:
+    matchLabels:
+      app: simple-student-registration-form
+  template:
+    metadata:
+      labels:
+        app: simple-student-registration-form
+    spec:
+      containers:
+      - name: app
+        image: tirucloud/srf:latest  # Replace with your actual image (built from Dockerfile)
+        ports:
+        - containerPort: 3000  # Matches EXPOSE in Dockerfile
+        env:
+        - name: MONGO_URL  # Assuming your app uses this; adjust based on your code
+          value: "mongodb://mongo:27017/studentDB"  # Connects to MongoDB service
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+        # Readiness probe (optional, checks if app is ready)
+        readinessProbe:
+          httpGet:
+            path: /  # Adjust to your app's health endpoint
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: simple-student-registration-form-service
+  labels:
+    app: simple-student-registration-form
+spec:
+  type: LoadBalancer  # Creates AWS ELB in EKS for external access
+  selector:
+    app: simple-student-registration-form
+  ports:
+  - protocol: TCP
+    port: 80  # External port (ELB listens here)
+    targetPort: 3000  # Matches containerPort in deployment

@@ -9,10 +9,17 @@ services:
     volumes:
       - .:/usr/src/app
     depends_on:
-      - mongo
+      mongo:
+        condition: service_healthy
     networks:
       - student-net
     restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   mongo:
     image: mongo:latest
@@ -24,6 +31,12 @@ services:
     networks:
       - student-net
     restart: always
+    healthcheck:
+      test: ["CMD", "mongo", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
 volumes:
   mongo-data:

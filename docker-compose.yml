@@ -1,17 +1,32 @@
+version: "3.8"
+
 services:
   app:
     build: .
+    container_name: student-app
     ports:
       - "3100:3000"
     volumes:
       - .:/usr/src/app
     depends_on:
       - mongo
+    networks:
+      - student-net
+    restart: always
+
   mongo:
     image: mongo:latest
+    container_name: mongo-db
     ports:
       - "27017:27017"
     volumes:
       - mongo-data:/data/db
+    networks:
+      - student-net
+    restart: always
+
 volumes:
   mongo-data:
+
+networks:
+  student-net:

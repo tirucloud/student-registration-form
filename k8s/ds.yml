@@ -28,7 +28,7 @@ spec:
     spec:
       containers:
         - name: student-app
-          image: <dockerhub-username>/student-app:latest   # <<< Docker Hub image
+          image: tirucloud/student-app:latest   # <<< Docker Hub image
           imagePullPolicy: Always
           ports:
             - containerPort: 3000

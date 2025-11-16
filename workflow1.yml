@@ -1,0 +1,61 @@
+name: CI/CD to EKS using Docker Hub
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout code
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # Step 2: Configure AWS Credentials
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1  # change region if needed
+
+      # Step 3: Login to Docker Hub
+      - name: Docker Login
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # Step 4: Build Docker image
+      - name: Build Docker Image
+        run: |
+          docker build -t student-app .
+
+      # Step 5: Tag Image for Docker Hub
+        # e.g: username/student-app:latest
+      - name: Tag Docker Image
+        run: |
+          docker tag student-app:latest ${{ secrets.DOCKERHUB_USERNAME }}/student-app:latest
+
+      # Step 6: Push image to Docker Hub
+      - name: Push Docker Image
+        run: |
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/student-app:latest
+
+      # Step 7: Update kubeconfig for EKS
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig --region us-east-1 --name <YOUR_EKS_CLUSTER_NAME>
+
+      # Step 8: Deploy to EKS
+      - name: Apply Kubernetes Manifests
+        run: kubectl apply -f eks-deployment.yaml
+
+      # Step 9: Rollout Restart (forces new image pull)
+      - name: Force Restart Deployment
+        run: |
+          kubectl rollout restart deployment/student-app -n student-app
